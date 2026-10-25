@@ -1,1 +1,40 @@
-<h1>Night Shift</h1><p>AI-generated trail-camera footage of creatures that should not exist. Instagram @nightshift.cam, YouTube @nightshift_cam.</p><p><a href="privacy.html">Privacy policy</a></p>
+---
+layout: default
+body_class: home
+description: Notes from my side projects, from soldering a puff counter to running an AI video channel on GitHub Actions.
+---
+<header class="masthead">
+  <div class="masthead__inner">
+    <h1 class="masthead__title">Kris’<br>Kreations</h1>
+    <p class="masthead__intro">I'm an AI engineer who can't leave a side project alone. These are the write-ups: what I made, how, and everything that went wrong on the way.</p>
+  </div>
+</header>
+
+<section class="post-list" aria-labelledby="posts-heading">
+  <h2 id="posts-heading" class="section-title">Posts</h2>
+  <ol>
+    {% for post in site.posts %}
+    <li class="post-row">
+      <a href="{{ post.url | relative_url }}">
+        {% if post.thumb %}<img class="post-row__thumb" src="{{ post.thumb | relative_url }}" alt="" loading="lazy">{% endif %}
+        <span class="post-row__text">
+          <span class="post-row__project">{{ post.project }}</span>
+          <span class="post-row__title">{{ post.title }}</span>
+          <span class="post-row__desc">{{ post.description }}</span>
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %B %Y" }}</time>
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="elsewhere" aria-labelledby="elsewhere-heading">
+  <h2 id="elsewhere-heading" class="section-title">Things that are running</h2>
+  <dl>
+    <dt>Night Shift</dt>
+    <dd>AI-generated trail-camera footage of creatures that should not exist. On Instagram as <a href="https://www.instagram.com/nightshift.cam/">@nightshift.cam</a> and YouTube as <a href="https://www.youtube.com/@nightshift_cam">@nightshift_cam</a>. <a href="{{ '/privacy.html' | relative_url }}">Night Shift Publisher privacy policy</a>.</dd>
+    <dt>Vaper Taper app</dt>
+    <dd>The Web Bluetooth app for my puff counter, hosted at <a href="{{ '/vape-logger/' | relative_url }}">/vape-logger/</a>. It needs the device to do anything useful.</dd>
+  </dl>
+</section>

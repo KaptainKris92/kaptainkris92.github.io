@@ -1,0 +1,31 @@
+---
+layout: default
+---
+{% assign words = content | strip_html | number_of_words %}
+{% assign minutes = words | divided_by: 220 | plus: 1 %}
+<article class="post">
+  <header class="post-head">
+    <p class="post-head__project">{{ page.project }}</p>
+    <h1 class="post-head__title">{{ page.title }}</h1>
+    {% if page.description %}<p class="post-head__standfirst">{{ page.description }}</p>{% endif %}
+    <p class="post-head__meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>,
+      about {{ minutes }} minutes to read{% if page.repo %}. Code: <a href="https://github.com/{{ page.repo }}">{{ page.repo }}</a>{% endif %}
+    </p>
+  </header>
+  {% if page.image %}
+  <figure class="post-hero{% if page.image_fit == 'contain' %} post-hero--contain{% endif %}">
+    <picture>
+      {% if page.image_dark %}<source media="(prefers-color-scheme: dark)" srcset="{{ page.image_dark | relative_url }}">{% endif %}
+      <img src="{{ page.image | relative_url }}" alt="{{ page.image_alt }}">
+    </picture>
+  </figure>
+  {% endif %}
+  <div class="prose">
+    {{ content }}
+  </div>
+  <nav class="post-nav" aria-label="More posts">
+    {% if page.previous %}<a href="{{ page.previous.url | relative_url }}"><span>Older</span>{{ page.previous.title }}</a>{% endif %}
+    {% if page.next %}<a class="post-nav__next" href="{{ page.next.url | relative_url }}"><span>Newer</span>{{ page.next.title }}</a>{% endif %}
+  </nav>
+</article>

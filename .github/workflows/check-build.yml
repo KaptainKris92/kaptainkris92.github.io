@@ -1,0 +1,21 @@
+# Builds the site with the same Jekyll builder GitHub Pages uses, so a pull
+# request shows whether it will build before it goes live. Publishing itself
+# still happens through Settings > Pages (deploy from the main branch).
+name: Check site builds
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
