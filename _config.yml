@@ -1,0 +1,23 @@
+title: Kris builds things
+description: Notes from my side projects, from soldering a puff counter to running an AI video channel on GitHub Actions.
+author: Kris
+url: https://kaptainkris92.github.io
+github: KaptainKris92
+
+# Posts live at /blog/<slug>/. /vape-logger/ is taken by the Vaper Taper app's own Pages site.
+permalink: /blog/:title/
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  toc_levels: 2..3
+
+plugins:
+  - jekyll-feed
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
