@@ -35,7 +35,7 @@ thumb: /assets/posts/my-post/thumb.jpg # optional, for the home page
 Text here. Put "* Contents" then "{:toc}" on the next line for a table of contents.
 ```
 
-Optional front matter: `image_dark` (a hero for dark mode), `image_fit: contain` (don't crop the hero), `charts: true` (loads the chart tooltips).
+Optional front matter: `image_dark` (a hero for dark mode), `image_credit` (a caption under the hero, HTML allowed), `image_fit: contain` (don't crop the hero), `charts: true` (loads the chart tooltips).
 
 ## Refreshing the Night Shift charts
 
