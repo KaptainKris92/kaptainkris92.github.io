@@ -118,10 +118,7 @@ a:hover { text-decoration-thickness: 2px; }
   letter-spacing: -0.045em;
   font-variation-settings: "opsz" 96;
 }
-.masthead__intro { margin: 0; max-width: 26rem; font-size: 1.15rem; color: var(--ink-2); }
-@media (min-width: 52rem) {
-  .masthead__inner { grid-template-columns: auto minmax(0, 1fr); }
-}
+.masthead__intro { margin: 0; max-width: 32rem; font-size: 1.15rem; color: var(--ink-2); }
 
 .section-title {
   font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
