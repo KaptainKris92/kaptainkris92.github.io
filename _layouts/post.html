@@ -19,6 +19,7 @@ layout: default
       {% if page.image_dark %}<source media="(prefers-color-scheme: dark)" srcset="{{ page.image_dark | relative_url }}">{% endif %}
       <img src="{{ page.image | relative_url }}" alt="{{ page.image_alt }}">
     </picture>
+    {% if page.image_credit %}<figcaption>{{ page.image_credit }}</figcaption>{% endif %}
   </figure>
   {% endif %}
   <div class="prose">

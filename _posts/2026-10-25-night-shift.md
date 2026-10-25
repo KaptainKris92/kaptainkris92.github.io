@@ -7,6 +7,7 @@ image: /assets/posts/night-shift/nightshift-iso.light.svg
 image_dark: /assets/posts/night-shift/nightshift-iso.dark.svg
 image_fit: contain
 image_alt: Isometric map of the Night Shift pipeline
+image_credit: 'Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (evoclock).'
 thumb: /assets/posts/night-shift/nightshift-iso.light.svg
 charts: true
 ---
@@ -31,14 +32,14 @@ The rules I set at the start, and still keep:
 
 ## The map
 
-Here's the whole system. My friend's tool, [pi-bowerbird](https://www.npmjs.com/package/@evoclock/pi-bowerbird), drew it from a single JSON file that lives in the repo. I describe the components, zones and connections once, and it renders an interactive HTML page plus animated light and dark SVGs. Unlike Mermaid, it routes the lines cleanly, never puts a label on top of a box, and can show which parts are built and which are only planned. The animated trace follows one video from start to finish.
+Here's the whole system. It was drawn with [pi-bowerbird](https://github.com/evoclock/pi-bowerbird), a diagramming tool made by my friend [Julen Gamboa (evoclock)](https://github.com/evoclock). It draws the map from a single JSON file that lives in the repo. I describe the components, zones and connections once, and it renders an interactive HTML page plus animated light and dark SVGs. Unlike Mermaid, it routes the lines cleanly, never puts a label on top of a box, and can show which parts are built and which are only planned. The animated trace follows one video from start to finish.
 
 <figure class="figure wide">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="/assets/posts/night-shift/nightshift.dark.svg">
     <img src="/assets/posts/night-shift/nightshift.light.svg" alt="Night Shift system map: plan (music and concept), film (fal.ai and FFmpeg), approve (Telegram), publish (evening window) and monitor (stats).">
   </picture>
-  <figcaption>The pipeline in five zones: plan, film, approve, publish and monitor. <a href="/assets/posts/night-shift/nightshift.html">Open the interactive version</a> to zoom and pan.</figcaption>
+  <figcaption>The pipeline in five zones: plan, film, approve, publish and monitor. <a href="/assets/posts/night-shift/nightshift.html">Open the interactive version</a> to zoom and pan. Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa.</figcaption>
 </figure>
 
 Rendering it was two commands:
