@@ -13,22 +13,30 @@ charts: true
 ---
 Every evening, a short video goes up on [@nightshift.cam](https://www.instagram.com/nightshift.cam/). It looks like grainy infrared footage from a trail camera strapped to a fence post. Something walks into frame that shouldn't exist, does one strange thing, and leaves.
 
-None of it is real, and every post says so. What I wanted to find out was whether I could build something that makes and posts these on its own, with me doing nothing but tapping **Approve** on my phone. Twelve days in, it has made 18 videos and posted 12 of them to three platforms. This is how it works, what it cost, and what I've learnt so far.
+None of it is real, and every post says so. What I wanted to find out was whether I could build something that makes and posts these on its own, with me doing nothing but tapping Approve/Reject or providing suggestions for improvement on my phone. Twelve days in, it has made 18 videos and posted 12 of them to three platforms. This is how it works, what it cost, and what I've learnt so far.
 
 * Contents
 {:toc}
 
 ## The idea
 
-Trail-cam clips do well on short-form video. They're short, they loop, and the low-quality infrared look hides a lot of sins. That last part matters, because AI video still struggles with crisp detail. A grainy, green-grey, motion-triggered clip is close to the best case for it.
+Since I've been seeing a lot of cool AI videos on Instagram over the past year, I decided to see if I could do something similar, but with minimal effort, as a proof-of-concept. I had the idea to do trail-cam clips as they don't require voice acting, any narrative, and are a single scene. The low-quality grainy green-grey infrared look also hides a lot of Gen AI video imperfections.
 
 The rules I set at the start, and still keep:
 
-- **The footage must look real.** The setting, lighting and physics are boring and believable. Only the creature is impossible.
+- **The footage must look real.** The setting, lighting and physics should be believable. Only the creature anatomy/behaviour is impossible.
 - **The creatures are original.** No Slenderman, no Wendigo, no greys, and never AI humans.
-- **Always disclosed.** Every post carries the platform's AI label, and the bios say "AI-generated". The mystery comes from the footage, not from hiding what it is.
+- **Always disclosed.** Every post carries the platform's AI label, and the profile bios say "AI-generated". The mystery comes from the footage, not from hiding what it is. The goal isn't to deceive people, it's just to generate cool creatures. 
 - **Nothing goes out without my approval.**
 - **Minimum spend.** Pay-per-use APIs only, no new subscriptions, until the channel earns something.
+
+### Inspiration
+
+The idea to post creature videos wasn't fully original and stemmed from admiring much higher quality channels such as:
+- [tamsy.land](https://www.instagram.com/tamsy.land/)
+- [dreamsweeper_](https://www.instagram.com/dreamsweeper_/)
+- [creaturopedia_cg](https://www.instagram.com/creaturopedia_cg/)
+- Probably many others I forgot the name of.
 
 ## The map
 
@@ -57,13 +65,21 @@ Each morning a GitHub Actions workflow runs `python -m nightshift make`. The sta
 
 ### 1. Music first
 
-This was the decision that made the videos feel edited rather than generated. The pipeline picks one of my own Suno tracks from the repo and analyses it with **librosa** to find the tempo, the beats and the drop. It then lays the video out on whole bars, with the drop landing about 40% of the way in. That's where the creature does its big moment.
+This was the decision that made the videos feel edited rather than generated. The pipeline picks one of the Suno-generated tracks from the repo and analyses it with **librosa** to find the tempo, the beats and the drop. It then lays the video out on whole bars, with the drop landing about 40% of the way in. That's where the creature does its 'big moment'.
 
-It also logs which section of which track each video used, so no section is ever reused. When I'm running low on unused music, the bot tells me.
+It also logs which section of which track each video used, so no section is ever reused. When I'm running low on unused music, the bot tells me. I used my entire month's Suno downloads to generate ~30 3-5 minute songs, which allows me to generate at least a year's worth of videos. 
+
+#### Generating the music
+I am a fan of psytrance and, given the creepy nature of trailcam footage, thought it would fit the footage fairly well. I asked Opus 5.5 to generate me a variety of prompts for psytrance music mixed with nature. It generated styles it termed 'dark dorest psy', 'psydub', 'psybient', and 'swamp acid'. Prior to that, I also tried some prompts for 'analog/minimal horror' and 'eerie forest ambience' scores as well as 'slow dark techno', 'witch house', 'trip-hop', and 'phonk'. Neither of which I really liked.
+
+I used `v6 Pro` to generate all the music. For some of the tracks, I used the `v6-wild` model and cranked Suno's 'Weirdness' setting up all the way. Unfortunately, this resulted in pure noise halfway through these tracks so I reverted back to `v6 Pro`.
+
+Ultimately, the generated songs were *good enough* but aren't anything amazing. With some extra time and motivation, I wouldn't mind producing my own songs in Ableton at some point, if the channels ever become monetisable. 
+
 
 ### 2. The concept
 
-**Claude** (Opus, via the API) invents the creature, the location and what it does. It writes the image prompt, the video prompt, the caption and the values for the camera's on-screen info bar. Each time it reads:
+**Claude** (Opus 5.5, via the API) invents the creature, the location and what it does. It writes the image prompt, the video prompt, the caption and the values for the camera's on-screen info bar. Each time it reads:
 
 - `style_guide.md`, the rules for the channel,
 - `data/guidance.md`, every note I've given it, newest last,
@@ -134,9 +150,9 @@ I built the first version in a single day with Claude Code. Most of what came af
 | 14 Oct | Daily schedule, evening posting window, and the "skip while one is waiting" rule. |
 | 15 Oct | IR flashes, endings where the creature leaves, re-makes, and tracking music use. |
 | 16 Oct | Switched from chained Veo clips to a single Kling take. Added the caption check. |
-| 17 Oct | Captions became a hook plus dry humour, instead of describing the video. |
+| 17 Oct | Captions became a hook plus dry humour, instead of simply describing the video. |
 | 20 Oct | Every video from the next day opens on the creature. Daily stats report on Telegram. |
-| 24 Oct | A stricter style guide after two weak videos, and the bowerbird map. |
+| 24 Oct | A stricter style guide after two weak videos, and [evoclock](https://github.com/evoclock)'s bowerbird map. |
 
 ## The numbers
 
@@ -168,7 +184,6 @@ The code was the easy bit. Getting videos I actually wanted to post took far mor
 - **Bale Folder:** nothing happened except some hay falling. Every creature now has to do something with a visible result: dig something up, rearrange an object, hunt.
 - **The creel and the skep:** two creatures based on objects I had to Google. Non-animal creatures now come from things everyone recognises, like a tree stump, a boulder or a fence.
 
-Every one of these is a sentence I typed as a reply to the bot. The next morning's video followed it.
 
 ## What's next
 
@@ -177,5 +192,6 @@ Every one of these is a sentence I typed as a reply to the bot. The next morning
 - Warn me before the Instagram token expires. It lasts 60 days, and Actions can't rewrite its own secrets.
 - A proper performance monitor: comment summaries, a look at similar channels, and experiments with Instagram's trial Reels. The daily stats report is the first piece of it.
 - Two videos a day, if watch time holds after the first four weeks.
+- Overall, I'm still not overly thrilled about the quality of the posts and there is huge room for improvement. Since this is a hobby experiment project that I'm just doing for fun and wish to spend minimal time and money on, I will just be iteratively improving the style guide as videos come in every day. 
 
 The repo is private for now, because it holds the channel's state and history. If you have questions about any part of it, the Night Shift accounts are the best place to find me.
