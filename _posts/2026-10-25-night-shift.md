@@ -7,8 +7,8 @@ image: /assets/posts/night-shift/nightshift-iso.light.svg
 image_dark: /assets/posts/night-shift/nightshift-iso.dark.svg
 image_fit: contain
 image_alt: Isometric map of the Night Shift pipeline
-image_credit: 'Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (evoclock).'
-thumb: /assets/posts/night-shift/nightshift-iso.light.svg
+image_credit: 'The pipeline in isometric view. <a href="/assets/posts/night-shift/nightshift-iso.html">Open the interactive version</a> to zoom and pan. Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (<a href="https://github.com/evoclock">evoclock</a>).'
+thumb: /assets/posts/night-shift/profile.jpg
 charts: true
 ---
 Every evening, a short video goes up on Instagram ([@nightshift.cam](https://www.instagram.com/nightshift.cam/)), YouTube ([@nightshift_cam](https://www.youtube.com/@nightshift_cam)) and the Night Shift Facebook Page. It looks like grainy infrared footage from a trail camera strapped to a fence post. Something walks into frame that shouldn't exist, does one strange thing, and leaves.
