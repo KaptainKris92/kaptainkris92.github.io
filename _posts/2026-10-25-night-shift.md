@@ -1,6 +1,6 @@
 ---
 title: Night Shift, a trail camera for things that don't exist
-description: How I built a pipeline that invents a creature, films it as infrared trail-cam footage, asks me on Telegram whether to post it, then puts it on Instagram, YouTube and Facebook. All on GitHub Actions, for about the price of a coffee per video.
+description: How I built a pipeline that invents a creature, films it as infrared trail-cam footage, asks me on Telegram whether to post it, then puts it on Instagram, YouTube and Facebook. All on GitHub Actions, for about the price of a coffee per video. A.K.A 'My contribution to the AI slop epidemic'.
 project: Night Shift
 date: 2026-10-25 12:00:00 +0000
 image: /assets/posts/night-shift/nightshift-iso.light.svg
