@@ -192,6 +192,6 @@ The code was the easy bit. Getting videos I actually wanted to post took far mor
 - Warn me before the Instagram token expires. It lasts 60 days, and Actions can't rewrite its own secrets.
 - A proper performance monitor: comment summaries, a look at similar channels, and experiments with Instagram's trial Reels. The daily stats report is the first piece of it.
 - Two videos a day, if watch time holds after the first four weeks.
-- Overall, I'm still not overly thrilled about the quality of the posts and there is huge room for improvement. Since this is a hobby experiment project that I'm just doing for fun and wish to spend minimal time and money on, I will just be iteratively improving the style guide as videos come in every day. 
+- Overall, I'm still not overly thrilled about the quality of the posts and there is huge room for improvement. Since this is a hobby experiment project that I'm just doing for fun and wish to spend minimal time and money on, I will just be iteratively improving the style guide as videos come in every day. Mostly, I'm just enjoying receiving weird creatures on my phone every morning. 
 
 The repo is private for now, because it holds the channel's state and history. If you have questions about any part of it, the Night Shift accounts are the best place to find me.
