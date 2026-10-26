@@ -243,22 +243,23 @@ a:hover { text-decoration-thickness: 2px; }
 .chart {
   --series-1: #2a78d6;
   --series-2: #eb6834;
+  --series-3: #1baf7a;
   --gridline: #e1e0d9;
   --axis: #c3c2b7;
   background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
   padding: 1.25rem 1.25rem 1rem; font-family: var(--font-display); position: relative;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .chart { --series-1: #3987e5; --series-2: #d95926; --gridline: #2c2c2a; --axis: #383835; }
+  :root:not([data-theme="light"]) .chart { --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --gridline: #2c2c2a; --axis: #383835; }
 }
-:root[data-theme="dark"] .chart { --series-1: #3987e5; --series-2: #d95926; --gridline: #2c2c2a; --axis: #383835; }
+:root[data-theme="dark"] .chart { --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --gridline: #2c2c2a; --axis: #383835; }
 
 .chart__title { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
 .chart__sub { margin: 0.2rem 0 0; color: var(--ink-2); font-size: 0.92rem; line-height: 1.4; }
 .chart__legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin: 0.9rem 0 0; padding: 0; list-style: none; font-size: 0.9rem; color: var(--ink-2); }
 .chart__legend li { display: flex; align-items: center; gap: 0.45rem; }
 .chart__key { width: 0.8rem; height: 0.8rem; border-radius: 3px; display: inline-block; }
-.chart__panels { display: grid; gap: 1.5rem 2.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); margin-top: 1rem; }
+.chart__panels { display: grid; gap: 1.5rem 1.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); margin-top: 1rem; }
 .chart svg { display: block; width: 100%; overflow: visible; }
 .chart svg text { fill: var(--ink-2); font-family: var(--font-display); }
 .chart svg .tick { fill: var(--muted); font-variant-numeric: tabular-nums; }
@@ -267,6 +268,7 @@ a:hover { text-decoration-thickness: 2px; }
 .chart .baseline { stroke: var(--axis); stroke-width: 1; }
 .chart .s1 { fill: var(--series-1); }
 .chart .s2 { fill: var(--series-2); }
+.chart .s3 { fill: var(--series-3); }
 .chart .hit { fill: transparent; cursor: default; }
 .chart .hit:hover + .mark, .chart .mark:hover { opacity: 0.8; }
 .chart details { margin-top: 0.75rem; font-size: 0.9rem; color: var(--ink-2); }
