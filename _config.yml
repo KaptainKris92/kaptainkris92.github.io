@@ -5,7 +5,14 @@ url: https://kaptainkris92.github.io
 github: KaptainKris92
 
 # Posts live at /blog/<slug>/. /vape-logger/ is taken by the Vaper Taper app's own Pages site.
-permalink: /blog/:title/
+# Set for posts only: a site-wide permalink ending in "/" also turns pages like
+# privacy.html into /privacy/, which broke the URL registered with Google and Meta.
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      permalink: /blog/:title/
 
 markdown: kramdown
 kramdown:
