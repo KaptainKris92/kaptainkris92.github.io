@@ -7,11 +7,11 @@ image: /assets/posts/night-shift/nightshift-iso.light.svg
 image_dark: /assets/posts/night-shift/nightshift-iso.dark.svg
 image_fit: contain
 image_alt: Isometric map of the Night Shift pipeline
-image_credit: 'Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (evoclock).'
-thumb: /assets/posts/night-shift/nightshift-iso.light.svg
+image_credit: 'The pipeline in isometric view. <a href="/assets/posts/night-shift/nightshift-iso.html">Open the interactive version</a> to zoom and pan. Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (<a href="https://github.com/evoclock">evoclock</a>).'
+thumb: /assets/posts/night-shift/profile.jpg
 charts: true
 ---
-Every evening, a short video goes up on [@nightshift.cam](https://www.instagram.com/nightshift.cam/). It looks like grainy infrared footage from a trail camera strapped to a fence post. Something walks into frame that shouldn't exist, does one strange thing, and leaves.
+Every evening, a short video goes up on Instagram ([@nightshift.cam](https://www.instagram.com/nightshift.cam/)), YouTube ([@nightshift_cam](https://www.youtube.com/@nightshift_cam)) and the Night Shift Facebook Page. It looks like grainy infrared footage from a trail camera strapped to a fence post. Something walks into frame that shouldn't exist, does one strange thing, and leaves.
 
 None of it is real, and every post says so. What I wanted to find out was whether I could build something that makes and posts these on its own, with me doing nothing but tapping Approve/Reject or providing suggestions for improvement on my phone. Twelve days in, it has made 18 videos and posted 12 of them to three platforms. This is how it works, what it cost, and what I've learnt so far.
 
@@ -171,9 +171,13 @@ The obvious outlier is **Sett Grub**, which reached 83,037 views on Instagram, a
 
 YouTube is the stranger story. It was doing better than Instagram for the first week, then fell to almost nothing from 20 October. The uploads still go through fine, so I don't know why yet. That's top of my list to dig into.
 
+Facebook has barely registered at all. The same 12 videos went up as Facebook Page Reels and got 27 plays between them, never more than 7 for a single Reel. The API also won't give me reach for Page Reels, so plays are the only count I have. I haven't done anything to grow the Page, so my guess is that Facebook just isn't showing the Reels to anyone yet.
+
 {% include charts/nightshift-watch.html %}
 
-Watch time is the number I care about most, because it decides how far Instagram pushes a Reel. Most videos hold people for 7 to 9 seconds out of 15. Opening on the creature hasn't moved that much yet. Fourjaw Wader still holds the record at 11.2 seconds, three days before the change.
+Watch time is the number I care about most, because it decides how far each platform pushes a video. On Instagram, most videos hold people for 7 to 9 seconds out of 15. Opening on the creature hasn't moved that much yet. Fourjaw Wader still holds the record at 11.2 seconds, three days before the change.
+
+YouTube's averages were higher in the first week, between 10 and 19 seconds, so some people watched the loop more than once. Since its views collapsed, though, each average comes from a handful of people. Facebook's averages swing from about 1 to 16 seconds, but with only a few plays per Reel, one person rewatching or scrolling past changes the number completely. I wouldn't read much into either yet.
 
 ## Taste is the hard part
 
@@ -187,7 +191,7 @@ The code was the easy bit. Getting videos I actually wanted to post took far mor
 
 ## What's next
 
-- Find out why YouTube views collapsed.
+- Find out why YouTube views collapsed, and why Facebook Reels get almost no plays.
 - Re-make a rejected sighting automatically, using my notes on it.
 - Warn me before the Instagram token expires. It lasts 60 days, and Actions can't rewrite its own secrets.
 - A proper performance monitor: comment summaries, a look at similar channels, and experiments with Instagram's trial Reels. The daily stats report is the first piece of it.
