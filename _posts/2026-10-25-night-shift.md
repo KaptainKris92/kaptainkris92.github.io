@@ -47,7 +47,7 @@ Here's the whole system. It was drawn with [pi-bowerbird](https://github.com/evo
     <source media="(prefers-color-scheme: dark)" srcset="/assets/posts/night-shift/nightshift.dark.svg">
     <img src="/assets/posts/night-shift/nightshift.light.svg" alt="Night Shift system map: plan (music and concept), film (fal.ai and FFmpeg), approve (Telegram), publish (evening window) and monitor (stats).">
   </picture>
-  <figcaption>The pipeline in five zones: plan, film, approve, publish and monitor. <a href="/assets/posts/night-shift/nightshift.html">Open the interactive version</a> to zoom and pan. Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa.</figcaption>
+  <figcaption>The pipeline in five zones: plan, film, approve, publish and monitor. <a href="/assets/posts/night-shift/nightshift.html">Open the interactive version</a> to zoom and pan. Diagram made with <a href="https://github.com/evoclock/pi-bowerbird">pi-bowerbird</a> by Julen Gamboa (<a href="https://github.com/evoclock">evoclock</a>).</figcaption>
 </figure>
 
 Rendering it was two commands:
