@@ -290,3 +290,28 @@ a:hover { text-decoration-thickness: 2px; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Expandable technical deep dive inside a post */
+.prose details.deep-dive {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--surface); padding: 0 1.25rem;
+}
+.prose details.deep-dive > summary {
+  cursor: pointer; list-style: none; padding: 1rem 0;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--accent);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.prose details.deep-dive > summary::-webkit-details-marker { display: none; }
+.prose details.deep-dive > summary::before {
+  content: ""; width: 0.55rem; height: 0.55rem; flex: none;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg); transition: transform 0.15s ease;
+}
+.prose details.deep-dive[open] > summary::before { transform: rotate(45deg); }
+.prose details.deep-dive[open] > summary { border-bottom: 1px solid var(--rule); margin-bottom: 0.5rem; }
+.prose details.deep-dive[open] { padding-bottom: 1.25rem; }
+.prose details.deep-dive > * + * { margin-top: 1em; }
+.prose details.deep-dive h3 { font-size: 1.15rem; margin-top: 1.8em; }
+.prose details.deep-dive h3:first-of-type { margin-top: 1em; }
+.prose details.deep-dive p, .prose details.deep-dive ul, .prose details.deep-dive ol { margin-bottom: 0; }
+.prose details.deep-dive pre { background: var(--code-bg); }
