@@ -140,6 +140,151 @@ Everything runs on the free Actions minutes of a private repo. The catch is that
 - The "make a sighting" workflow is scheduled **five times** between 05:23 and 13:23 UTC. The first run of the day makes the video; the rest see it's done and skip.
 - Two Claude routines also start the workflows each day, as a backup in case GitHub skips them all.
 
+## Under the hood
+
+The sections above are the overview. If you want the actual signal processing, FFmpeg filter graphs and API plumbing, open this up. Everything here is lifted from the code.
+
+<details class="deep-dive">
+<summary>Show the technical details</summary>
+
+<h3>1. Finding the beat and the drop (librosa + NumPy)</h3>
+
+<p>Everything starts in <code>music.py</code>. A track is loaded as mono at 22,050 Hz, and librosa computes an <strong>onset strength envelope</strong>: a curve of how much new energy appears in each frame (spectral flux, 512-sample hop, so about 43 values a second). Peaks in it are kicks, snares and other hits.</p>
+
+<pre><code>y, sr = librosa.load(track, sr=22050, mono=True)
+onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+tempo, beat_frames = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)</code></pre>
+
+<p><strong>librosa's beat tracker on its own wasn't good enough.</strong> It snaps to a quantised tempo and can skip beats through a noisy section, so over 30 seconds its beats drift visibly off the music, and glitches land between kicks. So the pipeline only uses it for a rough beat period (the median gap between its beats), then fits its own perfectly steady grid with a brute-force search:</p>
+
+<ul>
+<li>161 candidate periods spread over ±4% of the rough period,</li>
+<li>24 phase offsets for each period,</li>
+<li>for each of those 3,864 grids, the mean onset strength at the frames where its beats land.</li>
+</ul>
+
+<p>The grid with the highest score wins. A steady grid works because Suno's tracks are machine-tempo, so there's no human drift to follow.</p>
+
+<pre><code>for period in np.linspace(rough * 0.96, rough * 1.04, 161):
+    for phase in np.linspace(0, period, 24, endpoint=False):
+        frames = np.round(np.arange(phase, duration, period) * frame_rate).astype(int)
+        score = onset_env[frames[frames &lt; n]].mean()</code></pre>
+
+<p><strong>The drop</strong> is found from loudness instead. librosa computes the RMS level every 0.1 s, and for each candidate beat the pipeline takes the mean level over the next 2 seconds minus the mean over the previous 2. The biggest jump is the drop.</p>
+
+<p><strong>Bars</strong> were the hard part. Telling a bar's first beat apart from the other three by onset strength doesn't work for four-on-the-floor music, because every kick is equally loud. But drops and section changes almost always land on the first beat of a bar, so the drop is assumed to be one, and bars are counted every four beats either side of it.</p>
+
+<h3>2. Laying the video out on the music</h3>
+
+<p>With a beat grid and a drop, the video is planned in whole bars. Kling films at most 15 seconds and the creature needs 1.5 seconds to leave the frame at the end, so the music part aims for 13 seconds. The drop lands 40% of the way in.</p>
+
+<p>For a 145 bpm psytrance track: a beat is 0.414 s, a bar is 1.655 s, 13 s rounds to <strong>8 bars (13.24 s)</strong>, the drop comes after 3 bars (<strong>4.97 s</strong>), and the take is rounded up to 15 s to leave room for the exit. The plan records where in the track to start, and the beat and bar times inside the video. Each run saves this as <code>plan.json</code>.</p>
+
+<p>The plan also gives the concept agent a written brief: genre, tempo, and an energy level. Under 90 bpm is "calm" (slow, deliberate movement), 128 bpm and up (or psytrance from 120) is "frantic" (fast, jerky and wrong after the drop), and anything else is "driving". The drop time becomes "the creature's most startling action happens at 4.97 s".</p>
+
+<p><strong>Never reusing a section:</strong> every video appends its track, start and end to <code>data/music_usage.jsonl</code>. When planning, any window that overlaps a used one (plus 4 seconds of room for the exit) is ruled out. If a track has nothing left, the next random track is tried. After each video, the free gaps in every track are added up to estimate how many videos' worth of music are left, and the bot warns me below 10.</p>
+
+<h3>3. Prompts with a fixed shape (Claude structured output)</h3>
+
+<p>Both Claude calls use the Anthropic SDK's <code>messages.parse</code> with a <strong>Pydantic model as the output format</strong>, so the answer comes back as a validated object instead of text to scrape. The concept model has typed fields for the creature, location, behaviour, keyframe prompt, opening-frame edit prompt, video prompt, caption, hashtags and the HUD values. The HUD values are themselves typed: a timestamp between 22:00 and 05:30, a whole-degree temperature, and a moon phase that must be one of eight values.</p>
+
+<p>The code then checks what a schema can't: the right number of video prompts, an opening prompt whenever the video opens on the creature, and a HUD date that isn't in the future (it's moved back a day at a time until it's before today). Server-side fallbacks retry with a fallback model if the main one refuses.</p>
+
+<p>The system prompt is assembled from <code>style_guide.md</code>, every note in <code>data/guidance.md</code>, the music brief and a description of how the footage will be made. The last 30 sightings go in as JSON lines from <code>data/history.jsonl</code>, so it can't repeat a creature or location. Camera numbers (CAM 01, CAM 02…) count up across the channel, and rejected videos don't use up a number.</p>
+
+<h3>4. One continuous take (fal.ai)</h3>
+
+<ol>
+<li><strong>FLUX.2 Pro</strong> makes the empty scene at 1080×1920.</li>
+<li><strong>FLUX.2 Pro Edit</strong> gets that image plus "add the creature here, keep everything else exactly the same". Because it's an edit of the same image, the background matches perfectly.</li>
+<li><strong>Kling O3 Pro</strong> gets the creature frame as <code>image_url</code> and the empty scene as <code>end_image_url</code>. It has to animate from one to the other, so the creature has to leave, and the background can't drift.</li>
+</ol>
+
+<p>The older Veo mode chains clips instead. FFmpeg pulls the exact frame where clip 1 will be cut (<code>-ss</code> to the cut time, <code>-frames:v 1</code>, or <code>-sseof -0.1</code> for the last frame) and that becomes clip 2's first frame. When Veo's content checker rejects a harmless prompt, which it does inconsistently, the same request is retried on Veo Fast.</p>
+
+<h3>5. The FFmpeg edit</h3>
+
+<p><code>editor.py</code> runs FFmpeg in three passes.</p>
+
+<p><strong>Pass 1: normalise each clip.</strong> Scale to cover 1080×1920 and centre-crop, 30 fps, square pixels, <code>yuv420p</code>. If a clip is shorter than its slot, <code>tpad=stop_mode=clone</code> holds the last frame. Clips with no sound get a silent stereo track from <code>anullsrc</code>, so every clip has identical streams.</p>
+
+<pre><code>scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,
+fps=30,setsar=1,format=yuv420p,tpad=stop_mode=clone:stop_duration=…</code></pre>
+
+<p><strong>Pass 2: join without re-encoding.</strong> Because every clip now has identical streams, the concat demuxer joins them with <code>-c copy</code>. It's instant and loses no quality.</p>
+
+<p><strong>Pass 3: one filter graph</strong> does the grade, the glitches, the overlay and the audio mix. It's long enough to be written to a file and passed with <code>-filter_complex_script</code>.</p>
+
+<p><em>The infrared grade.</em> Four filters, all scaled by one <code>grade_strength</code> setting (0.6):</p>
+
+<pre><code>eq=saturation=0.40:contrast=1.09,
+colorchannelmixer=rr=0.82:gg=1:bb=0.82,
+noise=alls=14:allf=t,
+vignette=angle=PI/4.40</code></pre>
+
+<p>Cutting colour saturation, then turning red and blue down to 82% while green stays at 100%, gives the green-grey night-vision tint. <code>allf=t</code> makes the noise change every frame, like real sensor grain, instead of a fixed pattern. The vignette darkens the corners like a cheap lens.</p>
+
+<p><em>Glitches on the beat.</em> The IR flashes and sensor dropouts are one <code>eq</code> filter whose brightness is an expression evaluated on every frame (<code>eval=frame</code>). Each flash adds a term that jumps up on its beat and fades out linearly over 0.2 s. Each dropout subtracts 0.7 for the two frames before a cut or the drop.</p>
+
+<pre><code>eq=brightness='0.45*between(t,4.970,5.170)*(1-(t-4.970)/0.2)
+             + 0.12*between(t,5.384,5.584)*(1-(t-5.384)/0.2) + …
+             - 0.7*between(t,4.903,4.969)':eval=frame</code></pre>
+
+<p>How busy it gets depends on the music. The drop always flashes at 0.45. In a "frantic" track, every beat after the drop flashes at 0.12 and every bar at 0.2. In a "driving" one, only the bars flash, at 0.16. Only about a third of videos get flashes at all, picked at random, so it doesn't become a gimmick.</p>
+
+<p><em>The trail-cam info bar.</em> A <code>drawbox</code> paints a black bar at 82% opacity over the bottom 5.5% of the frame. <code>drawtext</code> filters write the camera number, the temperature in °C and °F (worked out in Python) and a moon-phase glyph. The clock is the clever bit: FFmpeg's <code>%{pts:gmtime:EPOCH:…}</code> adds each frame's presentation time to a start time in Unix seconds, so the clock genuinely ticks with the footage.</p>
+
+<pre><code>drawtext=fontfile=DejaVuSansMono.ttf:x=w-text_w-37:
+  text='%{pts\:gmtime\:1792378034\:%Y-%m-%d %H\\\:%M\\\:%S}'</code></pre>
+
+<p>In the chained-clip mode, each segment gets its own clock (switched on with <code>enable='between(t,a,b)'</code>) whose start time jumps forward 3 to 40 random seconds at each cut. That's what a motion-triggered camera does when it re-triggers.</p>
+
+<p><em>Audio.</em> The music is a second input, seeked straight to the planned spot with <code>-ss</code>. It's mixed under the clip's own sound with <code>amix</code> (<code>normalize=0</code>, so FFmpeg doesn't quietly halve both volumes). After that come a 30 ms fade-in so it doesn't click, a 1-second fade-out, and <code>alimiter</code> at 0.9 to stop clipping.</p>
+
+<p><em>Encode.</em> H.264 at CRF 20, capped with <code>-maxrate 8M -bufsize 16M</code>. The cap matters because film grain is noise, which costs a lot of bits, and a Telegram bot can only download files up to 20 MB. 15 s at 8 Mb/s plus 192 kb/s of AAC audio comes to at most about 15.4 MB. <code>-movflags +faststart</code> puts the index at the front so the video starts playing before it has fully downloaded.</p>
+
+<h3>6. Checking the caption against the video</h3>
+
+<p>FFmpeg grabs 12 evenly spaced frames from the finished video, one from the middle of each twelfth of its length, as small 360 px JPEGs. They're sent to Claude as base64 images, each labelled with its time, alongside the planned caption and the creature description. The structured output returns the corrected caption and a YouTube title. The prompt includes the last 10 titles, so the wording varies.</p>
+
+<h3>7. Telegram as the approval UI, and git as the database</h3>
+
+<ul>
+<li><strong>No server.</strong> The bot is a few hundred lines of standard-library Python calling the Telegram Bot API over HTTPS. Videos are sent as hand-built <code>multipart/form-data</code>. A scheduled workflow calls <code>getUpdates</code> with a saved <code>offset</code>, so each tap or reply is read exactly once, even though nothing is listening in between.</li>
+<li><strong>Buttons.</strong> I started with inline buttons, but Telegram dropped taps that the hourly poll didn't collect quickly enough. They're now ordinary keyboard buttons, which just send a normal message saying "✅ Approve", and Telegram keeps those until the next poll reads them.</li>
+<li><strong>Matching replies to videos.</strong> A reply to a video is matched to its run by <code>message_id</code>. A bare "approve" goes to the latest video waiting. If a run crashed after sending its video but before saving, a later reply to that video rebuilds the missing record from the video's own caption.</li>
+<li><strong>State in git.</strong> Every decision, note, post ID and stat lives in <code>data/approvals.json</code>. Each workflow ends with a script that commits <code>data/</code> and pushes, with a <code>git pull --rebase</code> and retry if another push got there first. All the workflows share one concurrency group, so they never run at the same time.</li>
+<li><strong>No big files in git.</strong> The finished video is never committed. Telegram keeps it, and the publisher downloads it again by its <code>file_id</code> when it's time to post.</li>
+</ul>
+
+<h3>8. Posting to three APIs</h3>
+
+<ul>
+<li><strong>Instagram</strong> (Graph API with Instagram Login) won't take an upload, only a public URL. So the file is uploaded to fal.ai's storage first. Then a <code>REELS</code> media container is created, polled every 15 seconds until <code>status_code</code> is <code>FINISHED</code>, and published.</li>
+<li><strong>YouTube</strong> trades the stored refresh token for a fresh access token on each run, then does a <strong>resumable upload</strong>. A POST with the metadata (title, description, tags, <code>containsSyntheticMedia: true</code>) returns an upload URL, and a PUT sends the bytes. If YouTube reports anything other than public, the bot tells me.</li>
+<li><strong>Facebook</strong> uses the Page Reels API's three phases: <code>start</code> returns a video ID, the bytes go to <code>rupload.facebook.com</code>, and <code>finish</code> with <code>video_state=PUBLISHED</code> posts it.</li>
+</ul>
+
+<p>Each platform's result or error is stored separately on the run, so a failure on one never causes a duplicate post on another. Posting only happens inside the 20:00 to 03:00 window (a window that crosses midnight, worked out in <code>Europe/London</code> time with <code>zoneinfo</code>), at most once per platform every 20 hours. All HTTP goes through a tiny wrapper around <code>urllib</code> whose error messages drop the query string, because some of these APIs put the access token in the URL.</p>
+
+<h3>9. Reading the stats</h3>
+
+<p>Every morning the latest 10 posts are checked on each platform:</p>
+
+<ul>
+<li><strong>Instagram:</strong> media insights (views, reach, skip rate, average watch time, likes, shares, saves).</li>
+<li><strong>YouTube:</strong> the Data API's live view and like counts, plus the Analytics API's average view duration and shares. The analytics run a day or two behind.</li>
+<li><strong>Facebook:</strong> video insights. If Facebook rejects the batch, the metrics are requested one at a time, skipping any it rejects for a Reel.</li>
+</ul>
+
+<p>A platform that fails is reported and skipped, without hiding the others.</p>
+
+<h3>10. Testing without spending money</h3>
+
+<p>There are 73 tests, and none of them calls a paid API. The fal.ai runner, the Claude client, Telegram and the HTTP layer are all passed in, so the tests swap in fakes. Test media is generated rather than committed. Videos come from FFmpeg's <code>testsrc2</code> pattern with a <code>sine</code> tone. The music tests build a synthetic dance track in NumPy and write it as a WAV: a 60 Hz sine kick with an exponential decay on every beat, accented on the first beat of each bar, quiet before a known drop and loud with noise hi-hats after it. So the beat-grid fitting and drop detection are checked against a track where the right answer is known. The test suite runs on every push.</p>
+
+</details>
+
 ## Twelve days of building
 
 I built the first version in a single day with Claude Code. Most of what came after was tuning.
