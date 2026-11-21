@@ -1,6 +1,6 @@
 # Builds the Jekyll site and serves it with nginx.
 # Build context is the repo root (see docker-compose.yml).
-FROM ruby:3.4-alpine AS build
+FROM ruby:3.3-alpine AS build
 RUN apk add --no-cache build-base
 ENV BUNDLE_GEMFILE=/site/deploy/Gemfile JEKYLL_ENV=production
 WORKDIR /site
