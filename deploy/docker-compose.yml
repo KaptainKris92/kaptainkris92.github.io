@@ -1,0 +1,22 @@
+# Serves the site on the Mac mini. cloudflared runs in its own container on the
+# shared "tunnel" network and reaches this one as http://kreations:80, the same
+# way it reaches stumps and octavo. The host port is only for local checks.
+name: kreations
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: kreations:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8020:80"
+    networks:
+      default:
+      tunnel:
+        aliases: [kreations]
+
+networks:
+  tunnel:
+    external: true
+    name: tunnel
