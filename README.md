@@ -46,3 +46,16 @@ python3 _scripts/nightshift_charts.py ../nightshift-pipeline/data/approvals.json
 ## Checking a change
 
 Pull requests run the same Jekyll build Pages uses (`.github/workflows/check-build.yml`). To preview locally, install Ruby, then `gem install jekyll jekyll-feed webrick` and run `jekyll serve`.
+
+## Self-hosting at kreations.kratzky.co.uk
+
+The same site is also built and served from the Mac mini, through the Cloudflare tunnel that serves stumps and octavo. Everything for that lives in `deploy/` (excluded from the Jekyll build):
+
+| File | What it does |
+|---|---|
+| `deploy/Dockerfile` | Builds the site with Jekyll 3.10 (the version GitHub Pages runs) and serves it with nginx |
+| `deploy/_config.selfhost.yml` | Sets `url` to `https://kreations.kratzky.co.uk` for that build |
+| `deploy/docker-compose.yml` | Runs the container on the shared `tunnel` network as `http://kreations:80`, and on `127.0.0.1:8020` for local checks |
+| `deploy/deploy.sh` | Run every minute by cron in `~/apps/kreations`. Rebuilds when `main` has a new commit. Log: `~/apps/kreations-deploy.log` |
+
+So pushing to `main` publishes to both GitHub Pages and kreations.kratzky.co.uk within a couple of minutes. The Cloudflare side (public hostname `kreations.kratzky.co.uk` → `http://kreations:80`) is set in the Zero Trust dashboard, since the tunnel is token-based.
